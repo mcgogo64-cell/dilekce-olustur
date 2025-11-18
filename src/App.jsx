@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail, Package, Sparkles, Eye } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { petitions } from "./petitionConfig";
+import dejavuBase64 from "./fonts/dejavuBase64.txt?raw";
 
 const STORAGE_KEY = "dilekcepro_state_v1";
 
@@ -25,15 +26,23 @@ const saveState = (payload) => {
 
 const formatDate = (val) => (val ? new Date(val).toLocaleDateString("tr-TR") : "");
 
+const ensureDejavu = (doc) => {
+  // Embed DejaVuSans to avoid bozuk karakter aralığı ve Türkçe sorunları
+  doc.addFileToVFS("DejaVuSans.ttf", dejavuBase64);
+  doc.addFont("DejaVuSans.ttf", "DejaVuSans", "normal");
+  doc.setFont("DejaVuSans", "normal");
+};
+
 const buildLetterPdf = (template, data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  doc.setFont("helvetica", ""); // Built-in font with geniş Latin desteği
-  doc.setFontSize(12);
+  ensureDejavu(doc);
+  doc.setFontSize(11);
+  doc.setTextColor(30, 36, 45);
+  doc.setLineHeightFactor(1.35);
 
-  doc.text(`Tarih: ${formatDate(data.tarih)}`, 190 - 20, 20, { align: "right" });
+  doc.text(`Tarih: ${formatDate(data.tarih)}`, 170, 20, { align: "right" });
   doc.text(`Konu: ${template.title}`, 20, 32);
 
-  // Kimlik bilgilerini tablo şeklinde göstermek için autotable
   autoTable(doc, {
     head: [["Alan", "Bilgi"]],
     body: [
@@ -45,14 +54,16 @@ const buildLetterPdf = (template, data) => {
       ["E-posta", data.email || "-"],
     ],
     startY: 42,
-    styles: { font: "helvetica", fontSize: 10 },
-    headStyles: { fillColor: [59, 130, 246] },
+    styles: { font: "DejaVuSans", fontStyle: "normal", fontSize: 10, textColor: [30, 36, 45], lineColor: [230, 235, 242] },
+    headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 247, 250] },
+    columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 125 } },
   });
 
-  const bodyStart = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 60;
+  const bodyStart = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : 60;
   const body = template.templateText(data);
   const lines = doc.splitTextToSize(body, 170);
-  doc.text(lines, 20, bodyStart);
+  doc.text(lines, 20, bodyStart, { lineHeightFactor: 1.35 });
 
   doc.text("İmza:", 20, 270);
   doc.text(`${data.ad || ""} ${data.soyad || ""}`, 20, 278);
@@ -61,7 +72,7 @@ const buildLetterPdf = (template, data) => {
 
 const buildEnvelopePdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  doc.setFont("helvetica", "");
+  ensureDejavu(doc);
   doc.setFontSize(14);
 
   const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
@@ -83,7 +94,7 @@ const buildEnvelopePdf = (data) => {
 
 const buildCargoPdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: [100, 150] }); // dikey
-  doc.setFont("helvetica", "");
+  ensureDejavu(doc);
   doc.setFontSize(16);
   doc.text("PTT Kargo Formu", 50, 12, { align: "center" });
 
@@ -168,6 +179,14 @@ export default function App() {
 
   const goNext = () => setStepIndex((i) => Math.min(i + 1, steps.length - 1));
   const goPrev = () => setStepIndex((i) => Math.max(i - 1, 0));
+
+  const clearAll = () => {
+    setAnswers({});
+    setStepIndex(0);
+    setShowPreviewMobile(false);
+    setBannerHidden(false);
+    saveState({});
+  };
 
   const startDownload = (action) => {
     setModal({ open: true, countdown: 5, action });
@@ -267,8 +286,16 @@ export default function App() {
                   <h2 className="text-xl font-semibold text-slate-900">{selectedTemplate.title}</h2>
                   <p className="text-sm text-slate-500">Soru bazlı ilerleyin, sağda önizleme görün.</p>
                 </div>
-                <div className="text-xs text-slate-500">
-                  {stepIndex + 1} / {steps.length}
+                <div className="flex flex-col items-end gap-2 text-xs text-slate-500">
+                  <span>
+                    {stepIndex + 1} / {steps.length}
+                  </span>
+                  <button
+                    onClick={clearAll}
+                    className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                  >
+                    Temizle (Tüm Yanıtlar)
+                  </button>
                 </div>
               </div>
 
@@ -385,3 +412,8 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+

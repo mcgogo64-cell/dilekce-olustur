@@ -25,7 +25,7 @@ export const petitions = [
 
 ${d.musteriNo} numaralı aboneliğimin hiçbir ek ücret tahakkuk ettirilmeden ${d.tarih} tarihi itibarıyla sonlandırılmasını talep ederim. Kullanıma kapatma, fatura kesiminin durdurulması ve varsa cayma bedeli muafiyetinin uygulanmasını arz ederim.
 
-${d.aciklama || "Ek açıklama: Yok."}
+${d.aciklama ? `Ek açıklama: ${d.aciklama}` : ``}
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
@@ -59,7 +59,7 @@ Adres: ${d.adres}
 Telefon: ${d.telefon || "-"}
 E-posta: ${d.email || "-"}
 
-${d.aciklama || "Ek açıklama bulunmamaktadır."}
+${d.aciklama ? `Ek açıklama: ${d.aciklama}` : ``}
 
 Gereğini arz ederim.`,
   },
@@ -85,7 +85,7 @@ Gereğini arz ederim.`,
 
 ${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında izinli sayılmak istiyorum. İzin süresince görevlerimi devretmiş bulunmaktayım.
 
-Gerekçe: ${d.aciklama || "Belirtilmedi."}
+${d.aciklama ? `Gerekçe: ${d.aciklama}` : ""}
 
 Ad Soyad: ${d.ad} ${d.soyad}
 Birim: ${d.birim || "-"}
