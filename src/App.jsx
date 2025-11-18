@@ -133,12 +133,10 @@ export default function App() {
 
   useEffect(() => {
     if (!selectedTemplate) return;
-    // reset step index if template changes
+    // Template değişince adımı başa al; form yazarken tetiklenmesin diye yalnızca template/id'ye bak.
     setStepIndex(0);
-    if (!answers[selectedId]) {
-      setAnswers((prev) => ({ ...prev, [selectedId]: defaultAnswers(selectedTemplate) }));
-    }
-  }, [selectedTemplate, selectedId, answers]);
+    setAnswers((prev) => (prev[selectedId] ? prev : { ...prev, [selectedId]: defaultAnswers(selectedTemplate) }));
+  }, [selectedTemplate, selectedId]);
 
   useEffect(() => {
     if (!modal.open || !modal.action) return;
