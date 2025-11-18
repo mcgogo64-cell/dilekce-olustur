@@ -210,12 +210,12 @@ export default function App() {
   const renderPreview = () => {
     if (!selectedTemplate) return null;
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-lg">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
           <FileText className="h-4 w-4" />
           Canlı Önizleme
         </div>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{selectedTemplate.templateText(currentAnswers)}</p>
+        <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{selectedTemplate.templateText(currentAnswers)}</p>
       </div>
     );
   };
@@ -239,7 +239,7 @@ export default function App() {
       <main className="mx-auto max-w-5xl px-4 pb-24">
         <section>
           <h1 className="text-2xl font-semibold text-slate-900">Dilekçe Türünü Seç</h1>
-          <p className="text-sm text-slate-500">Tamamen config ile yönetilir; yeni dilekçe eklemek için sadece JSON listesine ekleme yapın.</p>
+          <p className="text-sm text-slate-500">İhtiyacınız olan dilekçe türünü seçin, soruları cevaplayın ve resmi evrakınızı saniyeler içinde indirin.</p>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {petitions.map((tpl) => (
               <button
