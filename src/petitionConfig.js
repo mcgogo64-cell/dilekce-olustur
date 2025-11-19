@@ -1,10 +1,10 @@
-export const petitions = [
+﻿export const petitions = [
   // TÜKETİCİ
   {
     id: "abonelik-iptal",
     title: "Abonelik İptali",
     category: "Tüketici",
-    description: "30 saniyede abonelik iptal PDF’i oluştur.",
+    description: "Cezasız abonelik fesih talebi.",
     steps: [
       { question: "Adınız", key: "ad", type: "text", required: true, placeholder: "Örn: Ahmet" },
       { question: "Soyadınız", key: "soyad", type: "text", required: true, placeholder: "Örn: Yılmaz" },
@@ -19,21 +19,17 @@ export const petitions = [
     ],
     templateText: (d) => `Sayın ${d.kurumAdi},
 
-${d.musteriNo} numaralı aboneliğimin hiçbir ek ücret tahakkuk ettirilmeden ${d.tarih} itibarıyla sonlandırılmasını talep ederim. Kullanıma kapatma, fatura kesiminin durdurulması ve varsa cayma bedeli muafiyetinin uygulanmasını arz ederim.
+${d.musteriNo} numaralı aboneliğimin ${d.tarih} tarihi itibarıyla herhangi bir cezai bedel uygulanmadan feshedilmesini talep ediyorum. Hizmete erişimin sonlandırılması, fatura kesiminin durdurulması ve varsa cayma bedeli muafiyetinin uygulanmasını arz ederim.
 
-${d.aciklama ? `Ek açıklama: ${d.aciklama}` : ``}
+${d.aciklama ? `İlave bilgi: ${d.aciklama}` : ""}
 
-Ad Soyad: ${d.ad} ${d.soyad}
-TCKN: ${d.tckn}
-Adres: ${d.adres}
-Telefon: ${d.telefon || "-"}
-E-posta: ${d.email || "-"}`,
+Gereğini bilgilerinize sunarım.`,
   },
   {
     id: "internet-cayma-itiraz",
     title: "İnternet Cayma Bedeli İtirazı",
     category: "Tüketici",
-    description: "Haksız cayma bedeline itiraz dilekçesi.",
+    description: "İnternet cayma bedeline karşı resmi metin.",
     steps: [
       { question: "Adınız", key: "ad", type: "text", required: true, placeholder: "Örn: Ayşe" },
       { question: "Soyadınız", key: "soyad", type: "text", required: true, placeholder: "Örn: Demir" },
@@ -47,20 +43,17 @@ E-posta: ${d.email || "-"}`,
     ],
     templateText: (d) => `${d.kurumAdi} Müşteri Hizmetleri'ne,
 
-${d.musteriNo} numaralı aboneliğime ilişkin ${d.faturaNo || "ilgili"} faturada yer alan cayma bedeline itiraz ediyorum. Hizmetin taahhüt koşullarına uygun sunulmaması sebebiyle bedelin iptalini talep ederim.
+${d.musteriNo} numaralı aboneliğime ilişkin ${d.faturaNo || "ilgili"} faturada yer alan cayma bedelinin iptalini talep ediyorum. Hizmetin taahhüt koşullarına uygun sunulmaması ve sürekli yaşanan aksaklıklar sebebiyle bedelin tarafıma yansıtılması hukuka aykırıdır.
 
-${d.aciklama ? `Ek açıklama: ${d.aciklama}` : ``}
+${d.aciklama ? `Olay özeti: ${d.aciklama}` : ""}
 
-Ad Soyad: ${d.ad} ${d.soyad}
-TCKN: ${d.tckn}
-Adres: ${d.adres}
-Tarih: ${d.tarih}`,
+Gereğini bilgilerinize arz ederim.`,
   },
   {
     id: "tv-iptal",
     title: "TV Aboneliği İptali",
     category: "Tüketici",
-    description: "Televizyon aboneliği iptali.",
+    description: "TV platformu iptal talebi.",
     steps: [
       { question: "Ad", key: "ad", type: "text", required: true },
       { question: "Soyad", key: "soyad", type: "text", required: true },
@@ -71,16 +64,15 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} Müşteri Hizmetleri'ne,
 
-${d.musteriNo} numaralı TV aboneliğimin ${d.tarih} itibarıyla sonlandırılmasını, fatura kesiminin durdurulmasını ve cihaz iadesi sürecinin başlatılmasını talep ederim.
+${d.musteriNo} numaralı TV aboneliğimin ${d.tarih} tarihinden itibaren sonlandırılmasını, faturalandırmanın durdurulmasını ve varsa ekipmanların iade prosedürünün başlatılmasını talep ederim.
 
-Ad Soyad: ${d.ad} ${d.soyad}
-Adres: ${d.adres}`,
+Saygılarımla.`,
   },
   {
     id: "ayipli-urun-iade",
     title: "Ayıplı Ürün İadesi",
     category: "Tüketici",
-    description: "Ayıplı ürün için iade/bedel talebi.",
+    description: "Ayıplı ürün iade/bedel talebi.",
     steps: [
       { question: "Ad", key: "ad", type: "text", required: true },
       { question: "Soyad", key: "soyad", type: "text", required: true },
@@ -91,21 +83,17 @@ Adres: ${d.adres}`,
       { question: "Tarih", key: "tarih", type: "date", required: true },
       { question: "Problemin Özeti", key: "aciklama", type: "textarea", required: true },
     ],
-    templateText: (d) => `${d.kurumAdi}'na,
+    templateText: (d) => `Sayın ${d.kurumAdi},
 
-${d.faturaNo} numaralı faturada yer alan ${d.urun} ürününde ayıp/arıza bulunmaktadır. Ürünün iadesi ve bedelinin tarafıma ödenmesini talep ederim.
+${d.faturaNo} numaralı faturada yer alan ${d.urun} ürününde ayıp/arıza tespit edilmiştir. ${d.aciklama}. 6502 sayılı Kanun uyarınca seçimlik hakkım olarak ürün bedelinin iadesini/ayıpsız misli ile değiştirilmesini talep ederim.
 
-Sorun: ${d.aciklama}
-
-Ad Soyad: ${d.ad} ${d.soyad}
-Adres: ${d.adres}
-Tarih: ${d.tarih}`,
+Gereğini arz ederim.`,
   },
   {
     id: "kargo-sikayet",
     title: "Kargo Şikayet Dilekçesi",
     category: "Tüketici",
-    description: "Teslimat gecikmesi/hasarı bildirimi.",
+    description: "Teslimat gecikmesi veya hasar bildirimi.",
     steps: [
       { question: "Ad", key: "ad", type: "text", required: true },
       { question: "Soyad", key: "soyad", type: "text", required: true },
@@ -117,17 +105,15 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} Müşteri Hizmetleri'ne,
 
-${d.kargoNo} takip numaralı gönderimde ${d.aciklama}. Gecikme/hasar nedeniyle zararımın tazminini ve sürecin incelenmesini talep ederim.
+${d.kargoNo} takip numaralı gönderimin ${d.tarih} tarihli teslim sürecinde ${d.aciklama}. Zararımın giderilmesi ve süreç hakkında yazılı bilgilendirme yapılmasını talep ederim.
 
-Ad Soyad: ${d.ad} ${d.soyad}
-Adres: ${d.adres}
-Tarih: ${d.tarih}`,
+Gereğini arz ederim.`,
   },
   {
     id: "garanti-tamir",
-    title: "Garanti Kapsamında Tamir",
+    title: "Garanti Kapsamında Tamir Talebi",
     category: "Tüketici",
-    description: "Garanti sürecinde ücretsiz tamir talebi.",
+    description: "Garanti kapsamındaki ücretsiz onarım talebi.",
     steps: [
       { question: "Ad", key: "ad", type: "text", required: true },
       { question: "Soyad", key: "soyad", type: "text", required: true },
@@ -139,19 +125,17 @@ Tarih: ${d.tarih}`,
       { question: "Tarih", key: "tarih", type: "date", required: true },
       { question: "Sorun", key: "aciklama", type: "textarea", required: true },
     ],
-    templateText: (d) => `${d.kurumAdi}'na,
+    templateText: (d) => `Sayın ${d.kurumAdi},
 
-${d.urun} ürünü ${d.faturaNo} faturasıyla alınmış olup garanti kapsamındadır. ${d.aciklama}. Ücretsiz tamir/onarım işleminin yapılmasını talep ederim.
+${d.urun} ürünü ${d.faturaNo} numaralı faturayla satın alınmış olup garanti kapsamındadır. ${d.aciklama}. Garanti koşulları gereğince ücretsiz onarımın yapılmasını, mümkün değilse ürünün yenisiyle değiştirilmesini arz ederim.
 
-Ad Soyad: ${d.ad} ${d.soyad}
-Adres: ${d.adres}
-Tarih: ${d.tarih}`,
+Saygılarımla.`,
   },
   {
     id: "banka-aidat-iade",
-    title: "Banka Aidatı İade",
+    title: "Banka Aidatı İade Talebi",
     category: "Bankacılık",
-    description: "Kredi kartı aidatı iade talebi.",
+    description: "Kredi kartı aidatının iadesi için dilekçe.",
     steps: [
       { question: "Ad", key: "ad", type: "text", required: true },
       { question: "Soyad", key: "soyad", type: "text", required: true },
@@ -162,7 +146,7 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} Genel Müdürlüğü'ne,
 
-Kredi kartımın (${d.kart}) ${d.tarih} tarihli ekstresinde yansıtılan kart aidatının iadesini talep ederim. Aksi durumda yasal yollara başvuracağımı bildiririm.
+Kredi kartımın (${d.kart}) ${d.tarih} tarihli ekstresinde yansıtılan kart aidatının 6502 sayılı Tüketicinin Korunması Hakkında Kanun gereği iadesini talep ediyorum. Aksi halde yasal haklarımı kullanacağımı bildiririm.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 Adres: ${d.adres}`,
@@ -183,11 +167,10 @@ Adres: ${d.adres}`,
     ],
     templateText: (d) => `${d.kurumAdi} Şubesine,
 
-${d.hesapNo} numaralı hesabımın (${d.iban || "IBAN belirtilmedi"}) kapatılarak bakiye varsa tarafıma aktarılmasını talep ederim.
+${d.hesapNo} numaralı hesabımın (${d.iban || "IBAN belirtilmedi"}) kapatılarak varsa bakiyenin tercih ettiğim hesaba aktarılmasını talep ederim. İşlemin tamamlandığına ilişkin yazılı bilgi rica ederim.
 
-Ad Soyad: ${d.ad} ${d.soyad}
-Adres: ${d.adres}
-Tarih: ${d.tarih}`,
+Tarih: ${d.tarih}
+Gereğini arz ederim.`,
   },
 
   // RESMİ
@@ -206,7 +189,7 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `Sayın ${d.kurumAdi},
 
-Yeni adresim: ${d.adres}. Adres değişikliğimin resmi kayıtlara işlenmesini arz ederim.
+Yeni adresim ${d.adres} olup bilgilerin resmi kayıtlara işlenmesini ve tarafıma teyit verilmesini arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
@@ -227,7 +210,7 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `İlgili Makama,
 
-Kimlik kartımı ${d.kayipYeri || ""} bölgesinde ${d.tarih} tarihinde kaybettim. Yeniden düzenlenmesini arz ederim.
+Kimlik kartımı ${d.kayipYeri || "ilgili bölgede"} ${d.tarih} tarihinde kaybettim. Yeniden düzenlenmesi ve kötüye kullanıma karşı kaydın yapılmasını arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
@@ -247,7 +230,7 @@ Adres: ${d.adres}`,
     ],
     templateText: (d) => `Sayın ${d.kurumAdi},
 
-İşlemlerimde kullanılmak üzere vukuatlı nüfus kayıt örneğimin tarafıma verilmesini arz ederim.
+İşlem ve başvurularımda kullanılmak üzere vukuatlı nüfus kayıt örneğimin tarafıma verilmesini arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
@@ -267,7 +250,7 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `İlgili Makama,
 
-${d.aciklama || "İşlemlerimde kullanılmak üzere"} adli sicil kaydımın verilmesini arz ederim.
+${d.aciklama || "Resmi işlemlerimde"} kullanılmak üzere adli sicil kaydımın düzenlenmesini arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
@@ -288,11 +271,10 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} Müdürlüğü'ne,
 
-Öğrencisi olduğum kurumdan öğrenci belgesi talep ediyorum.
+Öğrenciniz olarak ${d.aciklama || "resmi işlemlerimde"} kullanılmak üzere öğrenci belgesi talep ediyorum.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 Öğrenci No: ${d.ogrNo}
-${d.aciklama ? `Nedeni: ${d.aciklama}` : ""}
 Tarih: ${d.tarih}`,
   },
   {
@@ -307,9 +289,9 @@ Tarih: ${d.tarih}`,
       { question: "Talep Kurumu", key: "kurumAdi", required: true },
       { question: "Tarih", key: "tarih", type: "date", required: true },
     ],
-    templateText: (d) => `${d.kurumAdi}'na,
+    templateText: (d) => `Sayın ${d.kurumAdi},
 
-Askerlik durum belgemin tarafıma verilmesini arz ederim.
+Askerlik durum belgemin resmi işlemlerde kullanılmak üzere tarafıma verilmesini arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
@@ -334,9 +316,7 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} İnsan Kaynakları'na,
 
-${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında mazeret izni talep ediyorum.
-
-Gerekçe: ${d.aciklama}
+${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında mazeret izni kullanmam gerekmektedir. Gerekçem: ${d.aciklama}. Görev devri yapılmış olup iletişim bilgilerim günceldir.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 Birim: ${d.birim || "-"}
@@ -359,13 +339,11 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} İnsan Kaynakları'na,
 
-${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında yıllık izin kullanmak istiyorum.
+${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında yıllık izin kullanmak istiyorum. İşlerimin devri tamamlanmış olup ihtiyaç halinde ulaşılabilirim.
 
 ${d.aciklama ? `Not: ${d.aciklama}` : ""}
 
-Ad Soyad: ${d.ad} ${d.soyad}
-Birim: ${d.birim || "-"}
-Tarih: ${d.tarih}`,
+Saygılarımla.`,
   },
   {
     id: "fazla-mesai-ucreti",
@@ -383,7 +361,7 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} İnsan Kaynakları'na,
 
-${d.donem || "ilgili dönemde"} gerçekleştirdiğim toplam ${d.mesai || "-"} saat fazla mesainin ücretinin ödenmesini talep ederim.
+${d.donem || "ilgili dönemde"} gerçekleştirdiğim toplam ${d.mesai || "belirtilen"} saat fazla mesai karşılığının 4857 sayılı İş Kanunu gereğince ödenmesini arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 Birim: ${d.birim || "-"}
@@ -405,13 +383,9 @@ Tarih: ${d.tarih}`,
     ],
     templateText: (d) => `${d.kurumAdi} İnsan Kaynakları'na,
 
-${d.yeniYer} görev yerine atanmayı talep ediyorum.
+Görevimin ${d.yeniYer} lokasyonunda sürdürülmesini talep ediyorum. Gerekçem: ${d.aciklama}. Uygun görülmesi halinde devir planını ivedilikle paylaşacağım.
 
-Gerekçe: ${d.aciklama}
-
-Ad Soyad: ${d.ad} ${d.soyad}
-Birim: ${d.birim || "-"}
-Tarih: ${d.tarih}`,
+Saygılarımla.`,
   },
 
   // KİRA & KONUT
@@ -426,13 +400,13 @@ Tarih: ${d.tarih}`,
       { question: "Ev Sahibi Adı", key: "kurumAdi", required: true, placeholder: "Ev sahibi/Yetkili" },
       { question: "Adres (Kiralık Yer)", key: "adres", type: "textarea", required: true },
       { question: "Sözleşme Bitiş", key: "tarih", type: "date", required: true },
-      { question: "İban", key: "iban", type: "text", placeholder: "Örn: TR00 ..." },
+      { question: "IBAN", key: "iban", type: "text", placeholder: "Örn: TR00 ..." },
     ],
-    templateText: (d) => `${d.kurumAdi}'na,
+    templateText: (d) => `Sayın ${d.kurumAdi},
 
-${d.adres} adresindeki kiralık mülkte depozito bedelimin sözleşme bitişi (${d.tarih}) itibarıyla iadesini talep ederim. İban: ${d.iban || "-"}.
+${d.adres} adresindeki kiralık mülkte sözleşmemiz ${d.tarih} tarihinde sona ermiştir. Taşınmazı hasarsız teslim ettiğimden depozito bedelimin ${d.iban || "bildireceğim IBAN"} hesabına iadesini talep ederim.
 
-Ad Soyad: ${d.ad} ${d.soyad}`,
+Gereğini arz ederim.`,
   },
   {
     id: "kira-zam-itiraz",
@@ -448,18 +422,18 @@ Ad Soyad: ${d.ad} ${d.soyad}`,
       { question: "Yasal Üst Sınır (%)", key: "ustSinir", type: "text", placeholder: "Örn: TÜFE oranı" },
       { question: "Tarih", key: "tarih", type: "date", required: true },
     ],
-    templateText: (d) => `${d.kurumAdi}'na,
+    templateText: (d) => `Sayın ${d.kurumAdi},
 
-${d.adres} adresindeki kira için bildirilen ${d.zam}% zam oranı yasal sınır (${d.ustSinir || "güncel TÜFE"}%) üzerindedir. Yasal orana çekilmesini talep ederim.
+${d.adres} adresindeki kira sözleşmem için bildirilen ${d.zam}% artış oranı, ${d.ustSinir || "güncel TÜFE"}% yasal sınırın üzerindedir. Kiranın mevzuata uygun şekilde güncellenmesini talep ederim.
 
-Ad Soyad: ${d.ad} ${d.soyad}
-Tarih: ${d.tarih}`,
+Tarih: ${d.tarih}
+Saygılarımla.`,
   },
   {
     id: "haksiz-tahliye",
     title: "Haksız Tahliye Uyarısı",
     category: "Kira & Konut",
-    description: "Haksız tahliye girişimine karşı uyarı dilekçesi.",
+    description: "Haksız tahliye girişimine karşı resmi uyarı.",
     steps: [
       { question: "Ad", key: "ad", required: true },
       { question: "Soyad", key: "soyad", required: true },
@@ -468,11 +442,10 @@ Tarih: ${d.tarih}`,
       { question: "Tarih", key: "tarih", type: "date", required: true },
       { question: "Gerekçe", key: "aciklama", type: "textarea", required: true },
     ],
-    templateText: (d) => `${d.kurumAdi}'na,
+    templateText: (d) => `Sayın ${d.kurumAdi},
 
-${d.adres} adresindeki kiracı olarak, haksız tahliye girişiminize karşı itiraz ediyorum. ${d.aciklama}. Yasal haklarımı saklı tutarım.
+${d.adres} adresindeki konutta kiracılık haklarım devam etmektedir. ${d.aciklama}. Haksız tahliye girişiminin durdurulmasını, aksi halde tüm yasal haklarımı kullanacağımı bildiririm.
 
-Ad Soyad: ${d.ad} ${d.soyad}
 Tarih: ${d.tarih}`,
   },
 
@@ -517,17 +490,13 @@ Adres: ${d.adres}
     ],
     templateText: (d) => `Sayın ${d.kurumAdi},
 
-İkametgah belgemin ${d.kurumAdi} nezdindeki işlemlerimde kullanılmak üzere tarafıma verilmesini arz ederim.
+İkametgah belgemin ${d.aciklama || "resmi işlemlerimde"} kullanılmak üzere tarafıma verilmesini arz ederim.
 
 Ad Soyad: ${d.ad} ${d.soyad}
 TCKN: ${d.tckn}
 Adres: ${d.adres}
 Telefon: ${d.telefon || "-"}
-E-posta: ${d.email || "-"}
-
-${d.aciklama ? `Ek açıklama: ${d.aciklama}` : ``}
-
-Gereğini arz ederim.`,
+E-posta: ${d.email || "-"}`,
   },
   {
     id: "izin-talebi",
@@ -549,14 +518,8 @@ Gereğini arz ederim.`,
     ],
     templateText: (d) => `${d.kurumAdi} İnsan Kaynakları'na,
 
-${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında izinli sayılmak istiyorum. İzin süresince görevlerimi devretmiş bulunmaktayım.
+${d.izinBaslangic} - ${d.izinBitis} tarihleri arasında izinli sayılmak istiyorum. ${d.aciklama ? `Gerekçem: ${d.aciklama}.` : ""} İzin süresince ${d.adres || "bildireceğim"} adreste bulunacağım ve ${d.telefon || "güncel"} iletişim numarasından ulaşılabilirim.
 
-${d.aciklama ? `Gerekçe: ${d.aciklama}` : ""}
-
-Ad Soyad: ${d.ad} ${d.soyad}
-Birim: ${d.birim || "-"}
-TCKN: ${d.tckn}
-Telefon: ${d.telefon || "-"}
-Adres: ${d.adres || "-"}`,
+Saygılarımla.`,
   },
 ];
