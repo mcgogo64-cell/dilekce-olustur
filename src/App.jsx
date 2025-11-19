@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail, Package, Sparkles, Eye, ChevronRight } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -140,6 +140,7 @@ export default function App() {
   const [bannerHidden, setBannerHidden] = useState(saved.bannerHidden || false);
   const [modal, setModal] = useState({ open: false, countdown: 5, action: null });
   const [categoryFilter, setCategoryFilter] = useState("Hepsi");
+  const wizardRef = useRef(null);
 
   const selectedTemplate = useMemo(() => petitions.find((p) => p.id === selectedId), [selectedId]);
   const currentAnswers = useMemo(() => answers[selectedId] || defaultAnswers(selectedTemplate), [answers, selectedId, selectedTemplate]);
@@ -160,6 +161,9 @@ export default function App() {
     // Template değişince adımı başa al; form yazarken tetiklenmesin diye yalnızca template/id'ye bak.
     setStepIndex(0);
     setAnswers((prev) => (prev[selectedId] ? prev : { ...prev, [selectedId]: defaultAnswers(selectedTemplate) }));
+    requestAnimationFrame(() => {
+      wizardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }, [selectedTemplate, selectedId]);
 
   useEffect(() => {
@@ -314,7 +318,7 @@ export default function App() {
         </section>
 
         {selectedTemplate && (
-          <section className="mt-8 grid gap-6 lg:grid-cols-2">
+          <section ref={wizardRef} className="mt-8 grid gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -452,6 +456,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
