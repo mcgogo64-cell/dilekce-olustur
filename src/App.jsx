@@ -1,9 +1,7 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail, Package, Sparkles, Eye, ChevronRight } from "lucide-react";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { petitions } from "./petitionConfig";
-import { notoSansRegularBase64, notoSansBoldBase64 } from "./fonts/notoSansBase64";
 
 const STORAGE_KEY = "dilekcepro_state_v1";
 
@@ -26,52 +24,88 @@ const saveState = (payload) => {
 
 const formatDate = (val) => (val ? new Date(val).toLocaleDateString("tr-TR") : "");
 
-const ensurePdfFont = (doc) => {
-  doc.addFileToVFS("NotoSans-Regular.ttf", notoSansRegularBase64);
-  doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
-  doc.addFileToVFS("NotoSans-Bold.ttf", notoSansBoldBase64);
-  doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
-  doc.setFont("NotoSans", "normal");
-};
-
-const buildLetterPdf = (template, data) => {
+const buildLetterPdf = async (template, data) => {
   try {
     console.log("Starting PDF generation...");
+
+    // HTML içeriği oluştur
+    const htmlContent = `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; color: #1e242d;">
+        <div style="text-align: right; margin-bottom: 20px;">
+          <strong>Tarih:</strong> ${formatDate(data.tarih)}
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <strong>Konu:</strong> ${template.title}
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <thead>
+            <tr style="background-color: #3b82f6; color: white;">
+              <th style="border: 1px solid #e6ebf2; padding: 8px; text-align: left; width: 30%;">Alan</th>
+              <th style="border: 1px solid #e6ebf2; padding: 8px; text-align: left;">Bilgi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background-color: #f5f7fa;">
+              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Ad Soyad</strong></td>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.ad || ""} ${data.soyad || ""}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>TCKN</strong></td>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.tckn || "-"}</td>
+            </tr>
+            <tr style="background-color: #f5f7fa;">
+              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Adres</strong></td>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.adres || "-"}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Kurum</strong></td>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.kurumAdi || data.kurum || "-"}</td>
+            </tr>
+            <tr style="background-color: #f5f7fa;">
+              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Telefon</strong></td>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.telefon || "-"}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>E-posta</strong></td>
+              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.email || "-"}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div style="line-height: 1.6; text-align: justify; margin-bottom: 40px;">
+          ${template.templateText(data).replace(/\n/g, '<br>')}
+        </div>
+        
+        <div style="margin-top: 60px;">
+          <div><strong>İmza:</strong></div>
+          <div style="margin-top: 10px;">${data.ad || ""} ${data.soyad || ""}</div>
+        </div>
+      </div>
+    `;
+
+    // Geçici div oluştur
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    document.body.appendChild(tempDiv);
+
+    // PDF oluştur
     const doc = new jsPDF({ unit: "mm", format: "a4" });
-    ensurePdfFont(doc);
-    doc.setFontSize(11);
-    doc.setTextColor(30, 36, 45);
-    doc.setLineHeightFactor(1.35);
 
-    doc.text(`Tarih: ${formatDate(data.tarih)}`, 170, 20, { align: "right" });
-    doc.text(`Konu: ${template.title}`, 20, 32);
-
-    autoTable(doc, {
-      head: [["Alan", "Bilgi"]],
-      body: [
-        ["Ad Soyad", `${data.ad || ""} ${data.soyad || ""}`.trim()],
-        ["TCKN", data.tckn || "-"],
-        ["Adres", data.adres || "-"],
-        ["Kurum", data.kurumAdi || data.kurum || "-"],
-        ["Telefon", data.telefon || "-"],
-        ["E-posta", data.email || "-"],
-      ],
-      startY: 42,
-      styles: { font: "NotoSans", fontStyle: "normal", fontSize: 10, textColor: [30, 36, 45], lineColor: [230, 235, 242] },
-      headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [245, 247, 250] },
-      columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 125 } },
+    await doc.html(tempDiv, {
+      callback: function (doc) {
+        doc.save(`${template.id}-dilekce.pdf`);
+        document.body.removeChild(tempDiv);
+        console.log("PDF saved successfully.");
+      },
+      x: 10,
+      y: 10,
+      width: 190,
+      windowWidth: 800
     });
-
-    const bodyStart = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : 60;
-    const body = template.templateText(data);
-    const lines = doc.splitTextToSize(body, 170);
-    doc.text(lines, 20, bodyStart, { lineHeightFactor: 1.35 });
-
-    doc.text("İmza:", 20, 270);
-    doc.text(`${data.ad || ""} ${data.soyad || ""}`, 20, 278);
-    doc.save(`${template.id}-dilekce.pdf`);
-    console.log("PDF saved successfully.");
   } catch (error) {
     console.error("Error generating PDF:", error);
     alert("PDF oluşturulurken bir hata oluştu: " + error.message);
@@ -80,7 +114,6 @@ const buildLetterPdf = (template, data) => {
 
 const buildEnvelopePdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  ensurePdfFont(doc);
   doc.setFontSize(13);
 
   const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
@@ -109,7 +142,6 @@ const buildEnvelopePdf = (data) => {
 
 const buildCargoPdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: [100, 150] }); // dikey
-  ensurePdfFont(doc);
   doc.setFontSize(16);
   doc.text("PTT Kargo Formu", 50, 12, { align: "center" });
 
