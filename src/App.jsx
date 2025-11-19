@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail,
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { petitions } from "./petitionConfig";
-import dejavuBase64 from "./fonts/dejavuBase64.txt?raw";
+import { notoSansBase64 } from "./fonts/notoSansBase64";
 
 const STORAGE_KEY = "dilekcepro_state_v1";
 
@@ -26,12 +26,17 @@ const saveState = (payload) => {
 
 const formatDate = (val) => (val ? new Date(val).toLocaleDateString("tr-TR") : "");
 
+const ensurePdfFont = (doc) => {
+  doc.addFileToVFS("NotoSans-Regular.ttf", notoSansBase64);
+  doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+  doc.setFont("NotoSans", "normal");
+};
+
 const buildLetterPdf = (template, data) => {
   try {
     console.log("Starting PDF generation...");
     const doc = new jsPDF({ unit: "mm", format: "a4" });
-    // ensureDejavu(doc); // Font file is corrupted, using standard font
-    doc.setFont("helvetica", "normal");
+    ensurePdfFont(doc);
     doc.setFontSize(11);
     doc.setTextColor(30, 36, 45);
     doc.setLineHeightFactor(1.35);
@@ -50,7 +55,7 @@ const buildLetterPdf = (template, data) => {
         ["E-posta", data.email || "-"],
       ],
       startY: 42,
-      styles: { font: "helvetica", fontStyle: "normal", fontSize: 10, textColor: [30, 36, 45], lineColor: [230, 235, 242] },
+      styles: { font: "NotoSans", fontStyle: "normal", fontSize: 10, textColor: [30, 36, 45], lineColor: [230, 235, 242] },
       headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [245, 247, 250] },
       columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 125 } },
@@ -73,8 +78,7 @@ const buildLetterPdf = (template, data) => {
 
 const buildEnvelopePdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  // ensureDejavu(doc);
-  doc.setFont("helvetica", "normal");
+  ensurePdfFont(doc);
   doc.setFontSize(13);
 
   const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
@@ -103,8 +107,7 @@ const buildEnvelopePdf = (data) => {
 
 const buildCargoPdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: [100, 150] }); // dikey
-  // ensureDejavu(doc);
-  doc.setFont("helvetica", "normal");
+  ensurePdfFont(doc);
   doc.setFontSize(16);
   doc.text("PTT Kargo Formu", 50, 12, { align: "center" });
 
@@ -507,6 +510,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
