@@ -187,6 +187,15 @@ export default function App() {
     }
   }, [selectedTemplate, selectedId]);
 
+  // SEO: Update page title dynamically based on selected petition
+  useEffect(() => {
+    if (selectedTemplate) {
+      document.title = `${selectedTemplate.title} - Ücretsiz Oluştur | DilekcePro`;
+    } else {
+      document.title = "DilekcePro - Ücretsiz Dilekçe Oluştur | 30 Saniyede Resmi Evrak Hazırla";
+    }
+  }, [selectedTemplate]);
+
   useEffect(() => {
     if (!modal.open) return;
 
