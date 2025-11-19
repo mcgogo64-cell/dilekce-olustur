@@ -167,20 +167,22 @@ export default function App() {
   }, [selectedTemplate, selectedId]);
 
   useEffect(() => {
-    if (!modal.open || !modal.action) return;
-    setModal((m) => ({ ...m, countdown: 5 }));
-    const interval = setInterval(() => {
-      setModal((m) => {
-        if (m.countdown <= 1) {
-          clearInterval(interval);
-          m.action();
-          return { open: false, countdown: 5, action: null };
-        }
-        return { ...m, countdown: m.countdown - 1 };
-      });
+    if (!modal.open) return;
+
+    if (modal.countdown <= 0) {
+      if (modal.action) {
+        modal.action();
+      }
+      setModal((prev) => ({ ...prev, open: false, action: null }));
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setModal((prev) => ({ ...prev, countdown: prev.countdown - 1 }));
     }, 1000);
-    return () => clearInterval(interval);
-  }, [modal.open, modal.action]);
+
+    return () => clearTimeout(timer);
+  }, [modal.countdown, modal.open, modal.action]);
 
   const handleSelect = (id) => {
     setSelectedId(id);
