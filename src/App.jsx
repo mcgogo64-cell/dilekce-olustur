@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail, Package, Sparkles, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail, Package, Sparkles, Eye, ChevronRight } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { petitions } from "./petitionConfig";
