@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail,
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { petitions } from "./petitionConfig";
-import { notoSansBase64 } from "./fonts/notoSansBase64";
+import { notoSansRegularBase64, notoSansBoldBase64 } from "./fonts/notoSansBase64";
 
 const STORAGE_KEY = "dilekcepro_state_v1";
 
@@ -27,8 +27,10 @@ const saveState = (payload) => {
 const formatDate = (val) => (val ? new Date(val).toLocaleDateString("tr-TR") : "");
 
 const ensurePdfFont = (doc) => {
-  doc.addFileToVFS("NotoSans-Regular.ttf", notoSansBase64);
+  doc.addFileToVFS("NotoSans-Regular.ttf", notoSansRegularBase64);
   doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+  doc.addFileToVFS("NotoSans-Bold.ttf", notoSansBoldBase64);
+  doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
   doc.setFont("NotoSans", "normal");
 };
 
@@ -510,6 +512,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
