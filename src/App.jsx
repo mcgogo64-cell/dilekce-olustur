@@ -26,53 +26,55 @@ const saveState = (payload) => {
 
 const formatDate = (val) => (val ? new Date(val).toLocaleDateString("tr-TR") : "");
 
-const ensureDejavu = (doc) => {
-  // Embed DejaVuSans to avoid bozuk karakter aralığı ve Türkçe sorunları
-  doc.addFileToVFS("DejaVuSans.ttf", dejavuBase64);
-  doc.addFont("DejaVuSans.ttf", "DejaVuSans", "normal");
-  doc.setFont("DejaVuSans", "normal");
-};
-
 const buildLetterPdf = (template, data) => {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  ensureDejavu(doc);
-  doc.setFontSize(11);
-  doc.setTextColor(30, 36, 45);
-  doc.setLineHeightFactor(1.35);
+  try {
+    console.log("Starting PDF generation...");
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    // ensureDejavu(doc); // Font file is corrupted, using standard font
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(30, 36, 45);
+    doc.setLineHeightFactor(1.35);
 
-  doc.text(`Tarih: ${formatDate(data.tarih)}`, 170, 20, { align: "right" });
-  doc.text(`Konu: ${template.title}`, 20, 32);
+    doc.text(`Tarih: ${formatDate(data.tarih)}`, 170, 20, { align: "right" });
+    doc.text(`Konu: ${template.title}`, 20, 32);
 
-  autoTable(doc, {
-    head: [["Alan", "Bilgi"]],
-    body: [
-      ["Ad Soyad", `${data.ad || ""} ${data.soyad || ""}`.trim()],
-      ["TCKN", data.tckn || "-"],
-      ["Adres", data.adres || "-"],
-      ["Kurum", data.kurumAdi || data.kurum || "-"],
-      ["Telefon", data.telefon || "-"],
-      ["E-posta", data.email || "-"],
-    ],
-    startY: 42,
-    styles: { font: "DejaVuSans", fontStyle: "normal", fontSize: 10, textColor: [30, 36, 45], lineColor: [230, 235, 242] },
-    headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
-    alternateRowStyles: { fillColor: [245, 247, 250] },
-    columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 125 } },
-  });
+    autoTable(doc, {
+      head: [["Alan", "Bilgi"]],
+      body: [
+        ["Ad Soyad", `${data.ad || ""} ${data.soyad || ""}`.trim()],
+        ["TCKN", data.tckn || "-"],
+        ["Adres", data.adres || "-"],
+        ["Kurum", data.kurumAdi || data.kurum || "-"],
+        ["Telefon", data.telefon || "-"],
+        ["E-posta", data.email || "-"],
+      ],
+      startY: 42,
+      styles: { font: "helvetica", fontStyle: "normal", fontSize: 10, textColor: [30, 36, 45], lineColor: [230, 235, 242] },
+      headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 247, 250] },
+      columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 125 } },
+    });
 
-  const bodyStart = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : 60;
-  const body = template.templateText(data);
-  const lines = doc.splitTextToSize(body, 170);
-  doc.text(lines, 20, bodyStart, { lineHeightFactor: 1.35 });
+    const bodyStart = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : 60;
+    const body = template.templateText(data);
+    const lines = doc.splitTextToSize(body, 170);
+    doc.text(lines, 20, bodyStart, { lineHeightFactor: 1.35 });
 
-  doc.text("İmza:", 20, 270);
-  doc.text(`${data.ad || ""} ${data.soyad || ""}`, 20, 278);
-  doc.save(`${template.id}-dilekce.pdf`);
+    doc.text("İmza:", 20, 270);
+    doc.text(`${data.ad || ""} ${data.soyad || ""}`, 20, 278);
+    doc.save(`${template.id}-dilekce.pdf`);
+    console.log("PDF saved successfully.");
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    alert("PDF oluşturulurken bir hata oluştu: " + error.message);
+  }
 };
 
 const buildEnvelopePdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  ensureDejavu(doc);
+  // ensureDejavu(doc);
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(13);
 
   const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
@@ -101,7 +103,8 @@ const buildEnvelopePdf = (data) => {
 
 const buildCargoPdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: [100, 150] }); // dikey
-  ensureDejavu(doc);
+  // ensureDejavu(doc);
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(16);
   doc.text("PTT Kargo Formu", 50, 12, { align: "center" });
 
@@ -156,22 +159,47 @@ export default function App() {
     saveState({ selectedId, answers, stepIndex, bannerHidden });
   }, [selectedId, answers, stepIndex, bannerHidden]);
 
+  const isFirstMount = useRef(true);
+  const prevSelectedId = useRef(null);
+
   useEffect(() => {
     if (!selectedTemplate) return;
-    // Template değişince adımı başa al; form yazarken tetiklenmesin diye yalnızca template/id'ye bak.
-    setStepIndex(0);
-    setAnswers((prev) => (prev[selectedId] ? prev : { ...prev, [selectedId]: defaultAnswers(selectedTemplate) }));
-    requestAnimationFrame(() => {
-      wizardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+
+    // İlk yüklemede scroll yapma (kullanıcı sayfayı yenilediğinde en üstte kalsın)
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      prevSelectedId.current = selectedId;
+      // Eğer state'den gelen bir seçim varsa, sadece state'i ayarla ama kaydırma
+      setStepIndex(0);
+      setAnswers((prev) => (prev[selectedId] ? prev : { ...prev, [selectedId]: defaultAnswers(selectedTemplate) }));
+      return;
+    }
+
+    // Sadece kullanıcı yeni bir dilekçe seçtiğinde scroll yap
+    if (prevSelectedId.current !== selectedId) {
+      prevSelectedId.current = selectedId;
+      // Template değişince adımı başa al
+      setStepIndex(0);
+      setAnswers((prev) => (prev[selectedId] ? prev : { ...prev, [selectedId]: defaultAnswers(selectedTemplate) }));
+      requestAnimationFrame(() => {
+        wizardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }, [selectedTemplate, selectedId]);
 
   useEffect(() => {
     if (!modal.open) return;
 
+    console.log("Modal countdown:", modal.countdown);
+
     if (modal.countdown <= 0) {
       if (modal.action) {
-        modal.action();
+        console.log("Executing modal action...");
+        try {
+          modal.action();
+        } catch (e) {
+          console.error("Error executing modal action:", e);
+        }
       }
       setModal((prev) => ({ ...prev, open: false, action: null }));
       return;
@@ -288,8 +316,8 @@ export default function App() {
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
                 className={`whitespace-nowrap rounded-full border px-5 py-2 text-sm font-medium transition-all duration-200 ${categoryFilter === cat
-                    ? "border-blue-500/20 bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-500/20 ring-offset-2"
-                    : "border-slate-200/60 bg-white/50 text-slate-600 hover:bg-white hover:shadow-md"
+                  ? "border-blue-500/20 bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-500/20 ring-offset-2"
+                  : "border-slate-200/60 bg-white/50 text-slate-600 hover:bg-white hover:shadow-md"
                   }`}
               >
                 {cat}
