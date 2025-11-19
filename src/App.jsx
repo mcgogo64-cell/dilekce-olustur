@@ -1,7 +1,9 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, Loader2, Mail, Package, Sparkles, Eye, ChevronRight } from "lucide-react";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { petitions } from "./petitionConfig";
+import { notoSansRegularBase64 } from "./fonts/notoSansBase64";
 
 const STORAGE_KEY = "dilekcepro_state_v1";
 
@@ -24,144 +26,176 @@ const saveState = (payload) => {
 
 const formatDate = (val) => (val ? new Date(val).toLocaleDateString("tr-TR") : "");
 
-const buildLetterPdf = async (template, data) => {
+const ensurePdfFont = (doc) => {
+  if (!doc.__turkishFontApplied) {
+    doc.addFileToVFS("NotoSans-Regular.ttf", notoSansRegularBase64);
+    doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+    doc.__turkishFontApplied = true;
+  }
+  doc.setFont("NotoSans", "normal");
+};
+
+const buildLetterPdf = (template, data) => {
   try {
-    console.log("Starting PDF generation...");
-
-    // HTML içeriği oluştur
-    const htmlContent = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; color: #1e242d;">
-        <div style="text-align: right; margin-bottom: 20px;">
-          <strong>Tarih:</strong> ${formatDate(data.tarih)}
-        </div>
-        
-        <div style="margin-bottom: 15px;">
-          <strong>Konu:</strong> ${template.title}
-        </div>
-        
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-          <thead>
-            <tr style="background-color: #3b82f6; color: white;">
-              <th style="border: 1px solid #e6ebf2; padding: 8px; text-align: left; width: 30%;">Alan</th>
-              <th style="border: 1px solid #e6ebf2; padding: 8px; text-align: left;">Bilgi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="background-color: #f5f7fa;">
-              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Ad Soyad</strong></td>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.ad || ""} ${data.soyad || ""}</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>TCKN</strong></td>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.tckn || "-"}</td>
-            </tr>
-            <tr style="background-color: #f5f7fa;">
-              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Adres</strong></td>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.adres || "-"}</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Kurum</strong></td>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.kurumAdi || data.kurum || "-"}</td>
-            </tr>
-            <tr style="background-color: #f5f7fa;">
-              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>Telefon</strong></td>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.telefon || "-"}</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;"><strong>E-posta</strong></td>
-              <td style="border: 1px solid #e6ebf2; padding: 8px;">${data.email || "-"}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div style="line-height: 1.6; text-align: justify; margin-bottom: 40px;">
-          ${template.templateText(data).replace(/\n/g, '<br>')}
-        </div>
-        
-        <div style="margin-top: 60px;">
-          <div><strong>İmza:</strong></div>
-          <div style="margin-top: 10px;">${data.ad || ""} ${data.soyad || ""}</div>
-        </div>
-      </div>
-    `;
-
-    // Geçici div oluştur
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    document.body.appendChild(tempDiv);
-
-    // PDF oluştur
     const doc = new jsPDF({ unit: "mm", format: "a4" });
+    ensurePdfFont(doc);
 
-    await doc.html(tempDiv, {
-      callback: function (doc) {
-        doc.save(`${template.id}-dilekce.pdf`);
-        document.body.removeChild(tempDiv);
-        console.log("PDF saved successfully.");
+    const marginLeft = 20;
+    const contentWidth = 170;
+    const titleY = 20;
+    const formattedDate = formatDate(data.tarih) || data.tarih || "-";
+
+    doc.setFontSize(16);
+    doc.text(template.title, marginLeft, titleY);
+    doc.setFontSize(12);
+    doc.text(`Tarih: ${formattedDate}`, 210 - marginLeft, titleY, { align: "right" });
+
+    const infoRows = [
+      ["Ad Soyad", `${(data.ad || "").trim()} ${(data.soyad || "").trim()}`.trim() || "-"],
+      ["TCKN", data.tckn || "-"],
+      ["Adres", data.adres || "-"],
+      ["Kurum", data.kurumAdi || data.kurum || "-"],
+      ["Telefon", data.telefon || "-"],
+      ["E-posta", data.email || "-"],
+    ];
+
+    autoTable(doc, {
+      startY: titleY + 10,
+      head: [["Alan", "Bilgi"]],
+      body: infoRows,
+      styles: {
+        font: "NotoSans",
+        fontSize: 11,
+        cellPadding: 6,
+        textColor: [30, 36, 45],
+        lineColor: [230, 235, 242],
+        lineWidth: 0.1,
       },
-      x: 10,
-      y: 10,
-      width: 190,
-      windowWidth: 800
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: [255, 255, 255],
+        halign: "left",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 247, 250],
+      },
+      columnStyles: {
+        0: { cellWidth: 50, fontStyle: "bold" },
+        1: { cellWidth: 120 },
+      },
     });
+
+    const tableY = doc.lastAutoTable?.finalY || titleY + 10;
+    const bodyStartY = tableY + 12;
+    const rawTemplate = template.templateText ? template.templateText(data) : "";
+    const sanitizedBody = rawTemplate ? rawTemplate.replace(/\r/g, "") : "";
+    const paragraphs = sanitizedBody.split("\n");
+    const letterLines = paragraphs.flatMap((line) => {
+      if (!line.trim()) return [""];
+      return doc.splitTextToSize(line, contentWidth);
+    });
+
+    doc.setFontSize(12);
+    doc.text(letterLines.length ? letterLines : [""], marginLeft, bodyStartY);
+
+    const lineHeight = (doc.getLineHeightFactor() * doc.internal.getFontSize()) / doc.internal.scaleFactor;
+    const bodyHeight = lineHeight * letterLines.length;
+    const signatureY = bodyStartY + bodyHeight + 10;
+    const signer = `${(data.ad || "").trim()} ${(data.soyad || "").trim()}`.trim() || "-";
+
+    doc.text("\u0130mza:", marginLeft, signatureY);
+    doc.text(signer, marginLeft, signatureY + 8);
+
+    doc.save(`${template.id}-dilekce.pdf`);
   } catch (error) {
     console.error("Error generating PDF:", error);
-    alert("PDF oluşturulurken bir hata oluştu: " + error.message);
+    alert("PDF olusturulurken bir hata olustu: " + error.message);
   }
 };
 
 const buildEnvelopePdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  ensurePdfFont(doc);
   doc.setFontSize(13);
 
-  const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
-  const adres = data.aliciAdres || data.adres || "Adres bilgisi";
-  const senderName = `${data.ad || ""} ${data.soyad || ""}`.trim() || "Ad Soyad";
+  const senderName = `${(data.ad || "").trim()} ${(data.soyad || "").trim()}`.trim() || "Ad Soyad";
+  const senderAddress = data.adres || "Adres bilgisi";
+  const senderPhone = data.telefon ? `Tel: ${data.telefon}` : "";
 
-  // Gönderici kutusu (sol üst)
-  doc.rect(20, 30, 100, 55);
-  doc.text("Gönderici", 25, 40);
-  doc.setFontSize(12);
-  doc.text(senderName, 25, 48);
-  doc.text(`Adres: ${data.adres || "Adres bilgisi"}`, 25, 56);
-  if (data.telefon) doc.text(`Tel: ${data.telefon}`, 25, 64);
+  const receiverName = data.alici || data.kurumAdi || data.kurum || "Kurum / Al\u0131c\u0131";
+  const receiverAddress = data.aliciAdres || data.adres || "Adres bilgisi";
+  const receiverPhone = data.aliciTelefon ? `Tel: ${data.aliciTelefon}` : "";
 
-  // Alıcı kutusu (sağ alt, daha geniş)
+  doc.rect(20, 30, 95, 55);
+  doc.text("G\u00F6nderici", 25, 40);
+  doc.setFontSize(11);
+  const senderLineHeight = (doc.getLineHeightFactor() * doc.internal.getFontSize()) / doc.internal.scaleFactor;
+  let senderY = 48;
+  const senderNameLines = doc.splitTextToSize(senderName, 85);
+  doc.text(senderNameLines, 25, senderY);
+  senderY += senderNameLines.length * senderLineHeight;
+  const senderAddressLines = doc.splitTextToSize(`Adres: ${senderAddress}`, 85);
+  doc.text(senderAddressLines, 25, senderY);
+  senderY += senderAddressLines.length * senderLineHeight;
+  if (senderPhone) doc.text(senderPhone, 25, senderY + 2);
+
   doc.setFontSize(13);
-  doc.rect(110, 120, 130, 80);
-  doc.text("Alıcı", 115, 132);
-  doc.setFontSize(12);
-  doc.text(alici, 115, 140);
-  doc.text(adres, 115, 148);
-  if (data.aliciTelefon) doc.text(`Tel: ${data.aliciTelefon}`, 115, 156);
+  doc.rect(120, 110, 75, 70);
+  doc.text("Al\u0131c\u0131", 125, 122);
+  doc.setFontSize(11);
+  const receiverLineHeight = (doc.getLineHeightFactor() * doc.internal.getFontSize()) / doc.internal.scaleFactor;
+  let receiverY = 132;
+  const receiverNameLines = doc.splitTextToSize(receiverName, 65);
+  doc.text(receiverNameLines, 125, receiverY);
+  receiverY += receiverNameLines.length * receiverLineHeight;
+  const receiverAddressLines = doc.splitTextToSize(receiverAddress, 65);
+  doc.text(receiverAddressLines, 125, receiverY);
+  receiverY += receiverAddressLines.length * receiverLineHeight;
+  if (receiverPhone) doc.text(receiverPhone, 125, receiverY + 2);
 
   doc.save("zarf-etiketi.pdf");
 };
 
 const buildCargoPdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: [100, 150] }); // dikey
+  ensurePdfFont(doc);
   doc.setFontSize(16);
   doc.text("PTT Kargo Formu", 50, 12, { align: "center" });
 
-  doc.setFontSize(12);
-  const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
-  const adres = data.adres || data.aliciAdres || "Adres bilgisi";
+  const senderName = `${(data.ad || "").trim()} ${(data.soyad || "").trim()}`.trim() || "Ad Soyad";
+  const senderAddress = data.adres || "Adres bilgisi";
+  const senderPhone = data.telefon ? `Tel: ${data.telefon}` : "";
 
+  const receiverName = data.alici || data.kurumAdi || data.kurum || "Kurum / Al\u0131c\u0131";
+  const receiverAddress = data.aliciAdres || data.adres || "Adres bilgisi";
+  const receiverPhone = data.aliciTelefon ? `Tel: ${data.aliciTelefon}` : "";
+
+  doc.setFontSize(12);
   doc.rect(10, 20, 80, 40);
-  doc.text("Gönderici", 12, 28);
-  doc.text(`${data.ad || ""} ${data.soyad || ""}`.trim() || "Ad Soyad", 12, 36);
-  doc.text(`Adres: ${adres}`, 12, 44);
-  if (data.telefon) doc.text(`Tel: ${data.telefon}`, 12, 52);
+  doc.text("G\u00F6nderici", 12, 28);
+  doc.setFontSize(11);
+  const cargoLineHeight = (doc.getLineHeightFactor() * doc.internal.getFontSize()) / doc.internal.scaleFactor;
+  let cargoSenderY = 36;
+  const cargoSenderName = doc.splitTextToSize(senderName, 70);
+  doc.text(cargoSenderName, 12, cargoSenderY);
+  cargoSenderY += cargoSenderName.length * cargoLineHeight;
+  const cargoSenderAddress = doc.splitTextToSize(`Adres: ${senderAddress}`, 70);
+  doc.text(cargoSenderAddress, 12, cargoSenderY);
+  cargoSenderY += cargoSenderAddress.length * cargoLineHeight;
+  if (senderPhone) doc.text(senderPhone, 12, cargoSenderY + 2);
 
   doc.rect(10, 65, 80, 50);
-  doc.text("Alıcı", 12, 73);
-  doc.text(alici, 12, 81);
-  doc.text(adres, 12, 89);
-  if (data.aliciTelefon) doc.text(`Tel: ${data.aliciTelefon}`, 12, 97);
+  doc.text("Al\u0131c\u0131", 12, 73);
+  let cargoReceiverY = 81;
+  const cargoReceiverName = doc.splitTextToSize(receiverName, 70);
+  doc.text(cargoReceiverName, 12, cargoReceiverY);
+  cargoReceiverY += cargoReceiverName.length * cargoLineHeight;
+  const cargoReceiverAddress = doc.splitTextToSize(receiverAddress, 70);
+  doc.text(cargoReceiverAddress, 12, cargoReceiverY);
+  cargoReceiverY += cargoReceiverAddress.length * cargoLineHeight;
+  if (receiverPhone) doc.text(receiverPhone, 12, cargoReceiverY + 2);
 
-  doc.text("İçerik: Resmi Evrak", 12, 122);
+  doc.text("\u0130\u00E7erik: Resmi Evrak", 12, 122);
   doc.save("ptt-kargo-etiketi.pdf");
 };
 
@@ -544,8 +578,6 @@ export default function App() {
     </div>
   );
 }
-
-
 
 
 
