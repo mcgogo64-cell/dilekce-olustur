@@ -73,21 +73,28 @@ const buildLetterPdf = (template, data) => {
 const buildEnvelopePdf = (data) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   ensureDejavu(doc);
-  doc.setFontSize(14);
+  doc.setFontSize(13);
 
   const alici = data.alici || data.kurumAdi || data.kurum || "Kurum / Alıcı";
-  const adres = data.adres || data.aliciAdres || "Adres bilgisi";
+  const adres = data.aliciAdres || data.adres || "Adres bilgisi";
+  const senderName = `${data.ad || ""} ${data.soyad || ""}`.trim() || "Ad Soyad";
 
-  doc.rect(10, 10, 90, 60);
-  doc.text("Gönderici", 15, 20);
-  doc.text(`${data.ad || ""} ${data.soyad || ""}`.trim() || "Ad Soyad", 15, 30);
-  doc.text(`Adres: ${adres}`, 15, 40);
-  if (data.telefon) doc.text(`Tel: ${data.telefon}`, 15, 50);
+  // Gönderici kutusu (sol üst)
+  doc.rect(20, 30, 100, 55);
+  doc.text("Gönderici", 25, 40);
+  doc.setFontSize(12);
+  doc.text(senderName, 25, 48);
+  doc.text(`Adres: ${data.adres || "Adres bilgisi"}`, 25, 56);
+  if (data.telefon) doc.text(`Tel: ${data.telefon}`, 25, 64);
 
-  doc.rect(110, 90, 90, 80);
-  doc.text("Alıcı", 115, 100);
-  doc.text(alici, 115, 110);
-  doc.text(adres, 115, 120);
+  // Alıcı kutusu (sağ alt, daha geniş)
+  doc.setFontSize(13);
+  doc.rect(110, 120, 130, 80);
+  doc.text("Alıcı", 115, 132);
+  doc.setFontSize(12);
+  doc.text(alici, 115, 140);
+  doc.text(adres, 115, 148);
+  if (data.aliciTelefon) doc.text(`Tel: ${data.aliciTelefon}`, 115, 156);
 
   doc.save("zarf-etiketi.pdf");
 };
@@ -232,7 +239,7 @@ export default function App() {
           <FileText className="h-4 w-4" />
           Canlı Önizleme
         </div>
-        <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{selectedTemplate.templateText(currentAnswers)}</p>
+        <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-800">{selectedTemplate.templateText(currentAnswers)}</p>
       </div>
     );
   };
@@ -262,10 +269,13 @@ export default function App() {
               <button
                 key={tpl.id}
                 onClick={() => handleSelect(tpl.id)}
-                className={`rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+                className={`relative rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
                   selectedId === tpl.id ? "border-blue-600 bg-white" : "border-slate-200 bg-white"
                 }`}
               >
+                <span className="absolute right-3 top-3 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-700">
+                  AI Destekli
+                </span>
                 <div className="flex items-center justify-between">
                   <p className="text-base font-semibold text-slate-900">{tpl.title}</p>
                   <Sparkles className="h-4 w-4 text-blue-600" />
@@ -292,7 +302,7 @@ export default function App() {
                   </span>
                   <button
                     onClick={clearAll}
-                    className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                    className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 shadow-sm transition hover:bg-blue-100 hover:border-blue-300"
                   >
                     Temizle (Tüm Yanıtlar)
                   </button>
@@ -378,6 +388,10 @@ export default function App() {
         )}
       </main>
 
+      <footer className="mx-auto max-w-5xl px-4 pb-10 text-center text-xs text-slate-500">
+        <p>Verileriniz kaydedilmez. PDF’ler tarayıcınızda, cihazınızda oluşturulur.</p>
+      </footer>
+
       {!bannerHidden && (
         <div className="fixed bottom-4 left-1/2 z-40 w-[95%] max-w-3xl -translate-x-1/2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -412,6 +426,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
