@@ -139,11 +139,17 @@ export default function App() {
   const [showPreviewMobile, setShowPreviewMobile] = useState(false);
   const [bannerHidden, setBannerHidden] = useState(saved.bannerHidden || false);
   const [modal, setModal] = useState({ open: false, countdown: 5, action: null });
+  const [categoryFilter, setCategoryFilter] = useState("Hepsi");
 
   const selectedTemplate = useMemo(() => petitions.find((p) => p.id === selectedId), [selectedId]);
   const currentAnswers = useMemo(() => answers[selectedId] || defaultAnswers(selectedTemplate), [answers, selectedId, selectedTemplate]);
   const steps = selectedTemplate?.steps || [];
   const currentStep = steps[stepIndex] || steps[0];
+  const categories = useMemo(() => ["Hepsi", ...Array.from(new Set(petitions.map((p) => p.category)))], []);
+  const filteredPetitions = useMemo(
+    () => petitions.filter((p) => (categoryFilter === "Hepsi" ? true : p.category === categoryFilter)),
+    [categoryFilter]
+  );
 
   useEffect(() => {
     saveState({ selectedId, answers, stepIndex, bannerHidden });
@@ -264,24 +270,44 @@ export default function App() {
         <section>
           <h1 className="text-2xl font-semibold text-slate-900">Dilekçe Türünü Seç</h1>
           <p className="text-sm text-slate-500">İhtiyacınız olan dilekçe türünü seçin, soruları cevaplayın ve resmi evrakınızı saniyeler içinde indirin.</p>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {petitions.map((tpl) => (
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  categoryFilter === cat ? "border-blue-600 bg-blue-600 text-white shadow-sm" : "border-slate-200 bg-white text-slate-600"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 space-y-3">
+            {filteredPetitions.map((tpl) => (
               <button
                 key={tpl.id}
                 onClick={() => handleSelect(tpl.id)}
-                className={`relative rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
-                  selectedId === tpl.id ? "border-blue-600 bg-white" : "border-slate-200 bg-white"
+                className={`w-full rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
+                  selectedId === tpl.id ? "border-blue-600" : "border-slate-200"
                 }`}
               >
-                <span className="absolute right-3 top-3 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-700">
-                  AI Destekli
-                </span>
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-semibold text-slate-900">{tpl.title}</p>
-                  <Sparkles className="h-4 w-4 text-blue-600" />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-base font-semibold text-slate-900">{tpl.title}</p>
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-700">
+                        AI Destekli
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs uppercase tracking-wide text-blue-600">{tpl.category}</div>
+                    <p className="mt-1 text-sm text-slate-500">{tpl.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
+                    Hemen oluştur
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
                 </div>
-                <p className="mt-1 text-xs uppercase tracking-wide text-blue-600">{tpl.category}</p>
-                <p className="mt-2 text-sm text-slate-500 line-clamp-2">{tpl.description}</p>
               </button>
             ))}
           </div>
