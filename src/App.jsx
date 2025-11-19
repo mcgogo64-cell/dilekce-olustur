@@ -257,18 +257,24 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 text-slate-900">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white text-lg font-semibold shadow-sm">DP</div>
-          <div>
-            <p className="text-lg font-semibold text-slate-900">DilekcePro</p>
-            <p className="text-sm text-slate-500">30 saniyede dilekçen hazır</p>
+    <div className="min-h-screen text-slate-900">
+      <header className="sticky top-0 z-30 border-b border-white/20 bg-white/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-lg font-bold shadow-lg shadow-blue-500/20">
+              DP
+            </div>
+            <div>
+              <p className="text-lg font-bold tracking-tight text-slate-900">DilekcePro</p>
+              <p className="text-xs font-medium text-slate-500">30 saniyede dilekçen hazır</p>
+            </div>
           </div>
-        </div>
-        <div className="hidden items-center gap-2 text-sm text-slate-500 sm:flex">
-          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          Giriş yok · Üyelik yok
+          <div className="hidden items-center gap-2 text-sm font-medium text-slate-600 sm:flex">
+            <div className="flex items-center gap-1.5 rounded-full bg-emerald-50/50 px-3 py-1 text-emerald-600 ring-1 ring-emerald-500/20">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span>Üyeliksiz</span>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -281,9 +287,10 @@ export default function App() {
               <button
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
-                className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
-                  categoryFilter === cat ? "border-blue-600 bg-blue-600 text-white shadow-sm" : "border-slate-200 bg-white text-slate-600"
-                }`}
+                className={`whitespace-nowrap rounded-full border px-5 py-2 text-sm font-medium transition-all duration-200 ${categoryFilter === cat
+                    ? "border-blue-500/20 bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-500/20 ring-offset-2"
+                    : "border-slate-200/60 bg-white/50 text-slate-600 hover:bg-white hover:shadow-md"
+                  }`}
               >
                 {cat}
               </button>
@@ -294,22 +301,27 @@ export default function App() {
               <button
                 key={tpl.id}
                 onClick={() => handleSelect(tpl.id)}
-                className={`w-full rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
-                  selectedId === tpl.id ? "border-blue-600" : "border-slate-200"
-                }`}
+                className={`group relative w-full overflow-hidden rounded-2xl border bg-white/60 p-5 text-left shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-blue-500/5 ${selectedId === tpl.id ? "border-blue-500 ring-2 ring-blue-500/20" : "border-white/50 hover:border-blue-200"
+                  }`}
               >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="flex items-center gap-3">
-                      <p className="text-base font-semibold text-slate-900">{tpl.title}</p>
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-700">
-                        AI Destekli
+                      <p className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                        {tpl.title}
+                      </p>
+                      <span className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm shadow-blue-500/20">
+                        <Sparkles className="mr-1 h-3 w-3" />
+                        AI
                       </span>
                     </div>
-                    <div className="mt-1 text-xs uppercase tracking-wide text-blue-600">{tpl.category}</div>
-                    <p className="mt-1 text-sm text-slate-500">{tpl.description}</p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-blue-600/80">{tpl.category}</span>
+                      <span className="h-1 w-1 rounded-full bg-slate-300"></span>
+                      <p className="text-sm text-slate-500">{tpl.description}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
                     Hemen oluştur
                     <ChevronRight className="h-4 w-4" />
                   </div>
@@ -320,8 +332,8 @@ export default function App() {
         </section>
 
         {selectedTemplate && (
-          <section ref={wizardRef} className="mt-8 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <section ref={wizardRef} className="mt-10 grid gap-8 lg:grid-cols-2">
+            <div className="rounded-3xl border border-white/50 bg-white/80 p-6 shadow-xl shadow-blue-500/5 backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm uppercase tracking-wide text-blue-600">Adım adım sihirbaz</p>
@@ -341,9 +353,9 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
                   style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }}
                 />
               </div>
@@ -374,7 +386,7 @@ export default function App() {
                   <button
                     onClick={goNext}
                     disabled={stepIndex >= steps.length - 1 || isNextDisabled}
-                    className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-blue-500/40 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     İleri
                     <ArrowRight className="h-4 w-4" />
@@ -385,7 +397,7 @@ export default function App() {
               <div className="mt-6 grid gap-3 md:grid-cols-3">
                 <button
                   onClick={() => startDownload(() => buildLetterPdf(selectedTemplate, currentAnswers))}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-blue-600 px-3 py-3 text-white shadow-sm transition hover:bg-blue-700"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40 hover:brightness-110"
                 >
                   <Download className="h-4 w-4" />
                   Dilekçeyi İndir (PDF)
